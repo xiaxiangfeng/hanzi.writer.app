@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>快乐学汉字 - 小学生写字练习</title>
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+  <style>
+    :root {
+      --primary-brand: #6D28D9;
+      --primary-brand-light: #EDE9FE;
+      --success-color: #16A34A;
+      --warning-color: #FBBF24;
+      --info-color: #2563EB;
+      --text-color: #1f2937;
+      --secondary-text-color: #6b7280;
+      --background-color: #f9fafb;
+      --card-background: #ffffff;
+      --border-color: #e5e7eb;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      background-color: var(--background-color);
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: var(--text-color);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--secondary-text-color);
+      font-size: 1.1rem;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .practice-area,
+    .card {
+      background: var(--card-background);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .character-display {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .current-character {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .character-info {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      min-height: 40px;
+      flex-wrap: wrap;
+    }
+
+    .pinyin {
+      font-size: 1.75rem;
+      color: var(--primary-brand);
+    }
+
+    .meaning {
+      font-size: 1.1rem;
+      color: var(--secondary-text-color);
+    }
+
+    #character-score {
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #hanzi-writer-target {
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #hanzi-writer-target svg {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      background: white;
+    }
+
+    /* 控制区：两行布局，更规整 */
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 12px;
+      grid-template-areas:
+        "animate practice"
+        "hint clear";
+      margin: 24px 0;
+      align-items: center;
+    }
+
+    #animate-btn {
+      grid-area: animate;
+    }
+
+    #practice-btn {
+      grid-area: practice;
+    }
+
+    .hint-inline {
+      grid-area: hint;
+      justify-self: start;
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #clear-btn {
+      grid-area: clear;
+      justify-self: end;
+      align-self: center;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-brand);
+      color: white;
+      width: 100%;
+      height: 56px;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+      width: 100%;
+      height: 56px;
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: var(--text-color);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .custom-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .custom-input:focus {
+      outline: none;
+      border-color: var(--primary-brand);
+      box-shadow: 0 0 0 3px var(--primary-brand-light);
+    }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      gap: 10px;
+    }
+
+    .character-btn {
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      background: transparent;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .character-btn:hover,
+    .character-btn:focus {
+      border-color: var(--primary-brand);
+      color: var(--primary-brand);
+      outline: none;
+    }
+
+    .character-btn.active {
+      background-color: var(--primary-brand);
+      border-color: var(--primary-brand);
+      color: white;
+      font-weight: bold;
+    }
+
+    .history-list,
+    #custom-history-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item:hover,
+    .history-item:focus {
+      background-color: #f5f5f7;
+      outline: none;
+    }
+
+    .history-character {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-brand);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-brand);
+    }
+
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      width: 90%;
+      max-width: 400px;
+      pointer-events: none;
+    }
+
+    .toast-message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      text-align: center;
+      color: white;
+      background-color: var(--success-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideDown 0.32s ease-out forwards;
+      pointer-events: auto;
+    }
+
+    .toast-message.error {
+      background-color: #ef4444;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 20px 0;
+      font-size: 0.9rem;
+    }
+
+    /* Fullscreen Practice Modal */
+    #fullscreen-practice-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(249, 250, 251, 0.98);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #fullscreen-practice-modal.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #fullscreen-hanzi-target {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    #fullscreen-hanzi-target svg {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .fullscreen-controls {
+      display: flex;
+      gap: 16px;
+      padding: 20px 0;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .fullscreen-controls .btn {
+      flex-grow: 1;
+      padding: 16px;
+      font-size: 1.1rem;
+    }
+
+    /* Hint switch */
+    .hint-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+    }
+
+    .hint-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .hint-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #d1d5db;
+      border-radius: 28px;
+      transition: .18s;
+    }
+
+    .hint-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      top: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .18s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    .hint-switch input:checked+.slider {
+      background-color: var(--primary-brand);
+    }
+
+    .hint-switch input:checked+.slider:before {
+      transform: translateX(24px);
+    }
+
+    /* =========================
+         FIX: Custom history layout
+         - show custom history items as small square pills,
+           arranged in a horizontal wrap, centered.
+         ========================= */
+    #custom-history-list {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 6px 0;
+      min-height: 52px;
+    }
+
+    /* style the char buttons inside custom-history to small square pills */
+    #custom-history-list .character-btn {
+      min-width: 46px;
+      width: 46px;
+      height: 46px;
+      padding: 0;
+      border-radius: 10px;
+      font-size: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 900px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      .header {
+        text-align: left;
+        margin-bottom: 16px;
+        padding: 0;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .current-character {
+        font-size: 3.2rem;
+      }
+
+      .pinyin {
+        font-size: 1.4rem;
+      }
+
+      .character-info {
+        min-height: 30px;
+        gap: 8px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+        grid-template-areas: "animate" "practice" "hint" "clear";
+      }
+
+      .btn-primary,
+      .btn-success {
+        height: 56px;
+      }
+
+      #clear-btn {
+        justify-self: center;
+      }
+
+      .character-btn {
+        min-height: 52px;
+        font-size: 1.25rem;
+      }
+
+      /* for mobile, custom history can remain wrap */
+      #custom-history-list {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="title">快乐学汉字</h1>
+      <p class="subtitle">跟着笔顺，轻松学写字！</p>
+    </div>
+
+    <div class="main-content">
+      <div class="practice-area" role="main" aria-label="练字区域">
+        <div class="character-display" aria-hidden="false">
+          <div class="current-character" id="current-character" aria-live="polite"></div>
+          <div class="character-info">
+            <div class="pinyin" id="character-pinyin" aria-hidden="true"></div>
+            <div id="character-score" role="status" aria-live="polite"></div>
+            <div class="meaning" id="character-meaning"></div>
+          </div>
+        </div>
+
+        <div id="hanzi-writer-target" style="width:260px; height:260px;" aria-label="汉字书写演示"></div>
+
+        <!-- 控制区：去掉重复提示按钮，只保留 hint switch -->
+        <div class="controls" role="toolbar" aria-label="控制区">
+          <button class="btn btn-primary" id="animate-btn" aria-label="演示笔顺">📚 演示笔顺</button>
+          <button class="btn btn-success" id="practice-btn" aria-label="开始练习">✏️ 开始练习</button>
+
+          <div class="hint-inline" title="显示提示" aria-hidden="false">
+            <label class="hint-switch" title="提示开关">
+              <input type="checkbox" id="hint-switch" aria-label="提示开关" />
+              <span class="slider" aria-hidden="true"></span>
+            </label>
+            <div style="font-weight:600;">提示</div>
+          </div>
+
+          <button class="btn btn-warning" id="clear-btn" aria-label="重新开始">🔄 重新开始</button>
+        </div>
+
+        <div class="stats" aria-label="练习统计">
+          <div class="stat-item">
+            <div class="stat-number" id="success-count">0</div>
+            <div class="stat-label">练习成功</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="total-count">0</div>
+            <div class="stat-label">总练习数</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar" aria-label="侧边栏">
+        <div class="card" aria-label="自定义练习">
+          <div class="card-title">🎯 自定义练习</div>
+          <input type="text" class="custom-input" id="custom-character" placeholder="输入单个汉字后按回车" maxlength="1"
+            aria-label="自定义汉字输入" />
+          <!-- 修复：custom-history-list 使用 flex 横向 wrap，按钮为小方块 -->
+          <div id="custom-history-list">
+            <div class="empty-state">还没有自定义记录</div>
+          </div>
+        </div>
+
+        <div class="card" aria-label="推荐汉字">
+          <div class="card-title">📖 推荐汉字</div>
+          <div class="character-grid" id="recommended-characters" aria-label="推荐汉字列表"></div>
+        </div>
+
+        <div class="card" aria-label="学习记录">
+          <div class="card-title">🕒 学习记录</div>
+          <div class="history-list" id="history-list">
+            <div class="empty-state">还没有练习记录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen -->
+  <div id="fullscreen-practice-modal" class="hidden" role="dialog" aria-modal="true" aria-label="全屏练习">
+    <div id="fullscreen-hanzi-target"></div>
+    <div class="fullscreen-controls">
+      <button class="btn btn-info" id="fullscreen-close-btn" aria-label="关闭全屏">关闭</button>
+      <button class="btn btn-warning" id="fullscreen-rewrite-btn" aria-label="重写">重写</button>
+      <button class="btn btn-primary" id="fullscreen-next-btn" aria-label="下一个" disabled>下一个</button>
+    </div>
+  </div>
+
+  <script>
+    class ChineseWritingApp {
+      constructor() {
+        this.writer = null;
+        this.fullscreenWriter = null;
+        this.currentCharacter = "";
+        this.practiceHistory = this.loadData("chineseWritingHistory", {});
+        this.customCharHistory = this.loadData("chineseCustomHistory", []);
+        this.stats = this.loadData("chineseWritingStats", { totalPractices: 0, successfulPractices: 0 });
+        this.showHints = this.loadData("chineseShowHints", true);
+        this.characterData = this.getCharacterDatabase();
+        this.recommendedChars = this.getRecommendedCharacters();
+        this.init();
+      }
+
+      init() {
+        this.cacheDOMElements();
+        this.setupEventListeners();
+        this.updateRecommendedCharacters();
+        this.updateCustomHistoryList();
+        this.updateHistory();
+        this.updateStats();
+        const initialChar = this.recommendedChars[0] || "学";
+        this.loadCharacter(initialChar);
+      }
+
+      cacheDOMElements() {
+        this.dom = {
+          practiceBtn: document.getElementById("practice-btn"),
+          scoreDisplay: document.getElementById("character-score"),
+          toastContainer: document.getElementById("toast-container"),
+          hintSwitch: document.getElementById("hint-switch"),
+          animateBtn: document.getElementById("animate-btn"),
+          clearBtn: document.getElementById("clear-btn"),
+          customInput: document.getElementById("custom-character"),
+          recommendedContainer: document.getElementById("recommended-characters"),
+          customHistoryContainer: document.getElementById("custom-history-list"),
+          historyListContainer: document.getElementById("history-list"),
+          // Fullscreen Modal
+          modal: document.getElementById("fullscreen-practice-modal"),
+          fullscreenTarget: document.getElementById("fullscreen-hanzi-target"),
+          fullscreenCloseBtn: document.getElementById("fullscreen-close-btn"),
+          fullscreenRewriteBtn: document.getElementById("fullscreen-rewrite-btn"),
+          fullscreenNextBtn: document.getElementById("fullscreen-next-btn"),
+        };
+      }
+
+      getCharacterDatabase() {
+        return {
+          学: { pinyin: "xué", meaning: "学习" }, 写: { pinyin: "xiě", meaning: "写字" },
+          字: { pinyin: "zì", meaning: "汉字" }, 人: { pinyin: "rén", meaning: "人类" },
+          大: { pinyin: "dà", meaning: "大小" }, 小: { pinyin: "xiǎo", meaning: "微小" },
+          中: { pinyin: "zhōng", meaning: "中间" }, 国: { pinyin: "guó", meaning: "国家" },
+          我: { pinyin: "wǒ", meaning: "自己" }, 你: { pinyin: "nǐ", meaning: "你好" },
+          他: { pinyin: "tā", meaning: "他人" }, 的: { pinyin: "de", meaning: "属于" },
+          爱: { pinyin: "ài", meaning: "爱心" }, 家: { pinyin: "jiā", meaning: "家庭" },
+          好: { pinyin: "hǎo", meaning: "好" }, 天: { pinyin: "tiān", meaning: "天空" }
+        };
+      }
+
+      getRecommendedCharacters() {
+        const allChars = Object.keys(this.characterData);
+        const practiced = Object.keys(this.practiceHistory);
+        const remaining = allChars.filter(char => !practiced.includes(char));
+        return remaining.length > 0 ? remaining : allChars;
+      }
+
+      setupEventListeners() {
+        // animate
+        this.dom.animateBtn.addEventListener("click", () => {
+          if (this.writer) {
+            if (typeof this.writer.animateCharacter === "function") this.writer.animateCharacter();
+            else if (typeof this.writer.showHint === "function") this.writer.showHint();
+          }
+        });
+
+        // clear / cancel quiz
+        this.dom.clearBtn.addEventListener("click", () => {
+          if (this.writer && typeof this.writer.cancelQuiz === "function") {
+            try { this.writer.cancelQuiz(); } catch (e) { }
+          }
+          this.dom.scoreDisplay.style.display = "none";
+          this.showMessage("已重置当前练习", "success");
+        });
+
+        // practice => open fullscreen and start quiz
+        this.dom.practiceBtn.addEventListener("click", () => this.enterFullscreenPractice());
+
+        // hint switch preference
+        if (this.dom.hintSwitch) {
+          this.dom.hintSwitch.checked = !!this.showHints;
+          this.dom.hintSwitch.addEventListener("change", (e) => {
+            this.showHints = e.target.checked;
+            this.saveData("chineseShowHints", this.showHints);
+            if (this.writer) {
+              if (this.showHints && typeof this.writer.showHint === "function") {
+                this.writer.showHint();
+              } else {
+                // no-op: keep outline if hideHint not available
+              }
+            }
+          });
+        }
+
+        // custom input enter
+        this.dom.customInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") this.addCustomCharacter();
+        });
+
+        // Fullscreen controls
+        this.dom.fullscreenCloseBtn.addEventListener("click", () => this.exitFullscreenPractice());
+        this.dom.fullscreenRewriteBtn.addEventListener("click", () => this.fullscreenWriter?.quiz?.());
+        this.dom.fullscreenNextBtn.addEventListener("click", () => this.nextFromFullscreen());
+
+        // Keyboard accessibility for history
+        this.dom.historyListContainer.addEventListener("keydown", (e) => {
+          if ((e.key === "Enter" || e.key === " ") && e.target && e.target.dataset && e.target.dataset.char) {
+            e.preventDefault(); this.loadCharacter(e.target.dataset.char);
+          }
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            if (!this.dom.modal.classList.contains("hidden")) this.exitFullscreenPractice();
+          }
+        });
+
+        document.addEventListener("keyup", (e) => {
+          if (e.key === "Tab") document.body.classList.add("user-is-tabbing");
+        });
+      }
+
+      async loadCharacter(character) {
+        this.exitFullscreenPractice();
+
+        this.currentCharacter = character;
+        this.dom.scoreDisplay.style.display = 'none';
+        document.getElementById("current-character").textContent = character;
+        const charData = this.characterData[character];
+        document.getElementById("character-pinyin").textContent = charData?.pinyin || "";
+        document.getElementById("character-meaning").textContent = charData?.meaning || "自定义汉字";
+        this.updateActiveCharacterButton(character);
+
+        const target = document.getElementById("hanzi-writer-target");
+        target.innerHTML = "";
+        const w = Math.min(300, Math.max(220, Math.floor(window.innerWidth * 0.22)));
+        const h = w;
+        this.writer = HanziWriter.create("hanzi-writer-target", character, {
+          width: w, height: h, padding: 20, showOutline: true,
+          strokeColor: "#1f2937", outlineColor: "#d1d5db", showCharacter: false
+        });
+
+        if (this.showHints) {
+          if (this.writer) {
+            if (typeof this.writer.showHint === "function") {
+              try { this.writer.showHint(); } catch (e) { /* ignore */ }
+            } else if (typeof this.writer.animateCharacter === "function") {
+              try { this.writer.animateCharacter(); } catch (e) { }
+            }
+          }
+        }
+      }
+
+      enterFullscreenPractice() {
+        if (!this.currentCharacter) return;
+        this.dom.modal.classList.remove('hidden');
+        this.dom.fullscreenNextBtn.disabled = true;
+
+        const size = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+        this.dom.fullscreenTarget.innerHTML = '';
+
+        this.fullscreenWriter = HanziWriter.create(this.dom.fullscreenTarget, this.currentCharacter, {
+          width: size, height: size, padding: 20, showOutline: true,
+          strokeColor: "#1f2937", outlineColor: "#d1d5db",
+          highlightOnComplete: true, highlightCompleteColor: "#16A34A",
+        });
+
+        if (this.showHints && typeof this.fullscreenWriter.showHint === "function") {
+          try { this.fullscreenWriter.showHint(); } catch (e) { }
+        } else if (this.showHints && typeof this.fullscreenWriter.animateCharacter === "function") {
+          try { this.fullscreenWriter.animateCharacter(); } catch (e) { }
+        }
+
+        if (typeof this.fullscreenWriter.quiz === "function") {
+          this.fullscreenWriter.quiz({
+            onComplete: (summary) => {
+              this.completePractice(summary);
+              this.dom.fullscreenNextBtn.disabled = false;
+            }
+          });
+        } else {
+          if (typeof this.fullscreenWriter.animateCharacter === "function") this.fullscreenWriter.animateCharacter();
+          this.showMessage("当前 HanziWriter 版本不支持 quiz 模式，已执行演示。", "warning");
+          this.dom.fullscreenNextBtn.disabled = false;
+        }
+      }
+
+      exitFullscreenPractice() {
+        this.dom.modal.classList.add('hidden');
+        this.fullscreenWriter = null;
+        this.dom.fullscreenTarget.innerHTML = '';
+      }
+
+      nextFromFullscreen() {
+        this.exitFullscreenPractice();
+        const currentIndex = this.recommendedChars.indexOf(this.currentCharacter);
+        const nextChar = this.recommendedChars[currentIndex + 1];
+        if (nextChar) {
+          this.loadCharacter(nextChar);
+        } else {
+          this.showMessage("推荐汉字已学完！", "success");
+        }
+      }
+
+      completePractice(summaryData = {}) {
+        const mistakes = typeof summaryData.totalMistakes === 'number' ? summaryData.totalMistakes : (typeof summaryData.mistakes === 'number' ? summaryData.mistakes : 0);
+
+        let strokeCount = null;
+        if (typeof summaryData.totalStrokes === 'number') strokeCount = summaryData.totalStrokes;
+        else if (typeof summaryData.numStrokes === 'number') strokeCount = summaryData.numStrokes;
+        else if (Array.isArray(summaryData.strokeMistakes)) strokeCount = summaryData.strokeMistakes.length;
+        if (strokeCount === null && this.fullscreenWriter && this.fullscreenWriter.characterData && Array.isArray(this.fullscreenWriter.characterData.strokes)) {
+          strokeCount = this.fullscreenWriter.characterData.strokes.length;
+        }
+        if (strokeCount === null) strokeCount = 5;
+
+        const perMistakePenalty = Math.round(100 / Math.max(5, strokeCount));
+        let score = Math.max(100 - mistakes * perMistakePenalty, 30);
+        score = Math.min(100, score);
+
+        const scoreEl = this.dom.scoreDisplay;
+        scoreEl.textContent = `${score}分`;
+        scoreEl.style.display = 'inline-block';
+        if (score >= 80) {
+          scoreEl.style.backgroundColor = 'var(--success-color)'; scoreEl.style.color = '#fff';
+        } else if (score >= 60) {
+          scoreEl.style.backgroundColor = 'var(--warning-color)'; scoreEl.style.color = '#1f2937';
+        } else {
+          scoreEl.style.backgroundColor = '#ef4444'; scoreEl.style.color = '#fff';
+        }
+
+        let message = "🎉 完美书写！太棒了！";
+        if (mistakes > 0 && mistakes <= Math.max(1, Math.floor(strokeCount / 3))) message = "👍 很棒！继续努力！";
+        else if (mistakes > Math.max(1, Math.floor(strokeCount / 3))) message = "😊 完成了！多练习会更好！";
+        this.showMessage(message, "success");
+
+        this.recordPractice(this.currentCharacter, mistakes, score);
+      }
+
+      addCustomCharacter() {
+        const input = this.dom.customInput;
+        const character = input.value.trim();
+        if (!character || !/[\u4e00-\u9fa5]/.test(character)) { this.showMessage("请输入一个有效的汉字", "error"); return; }
+        input.value = ""; this.loadCharacter(character);
+        if (!this.customCharHistory.includes(character)) {
+          this.customCharHistory.unshift(character);
+          if (this.customCharHistory.length > 30) this.customCharHistory.length = 30;
+          this.saveData("chineseCustomHistory", this.customCharHistory);
+          this.updateCustomHistoryList();
+        }
+      }
+
+      recordPractice(character, mistakes, score) {
+        const record = { character, mistakes, score, timestamp: new Date().toISOString() };
+        if (!this.practiceHistory[character]) this.practiceHistory[character] = [];
+        this.practiceHistory[character].push(record);
+        if (this.practiceHistory[character].length > 100) this.practiceHistory[character].shift();
+        this.saveData("chineseWritingHistory", this.practiceHistory);
+
+        this.stats.totalPractices++;
+        if (score >= 80) this.stats.successfulPractices++;
+        this.saveData("chineseWritingStats", this.stats);
+
+        this.updateAllViews();
+      }
+
+      updateAllViews() {
+        this.updateStats();
+        this.updateHistory();
+        this.recommendedChars = this.getRecommendedCharacters();
+        this.updateRecommendedCharacters();
+        this.updateActiveCharacterButton(this.currentCharacter);
+      }
+
+      updateActiveCharacterButton(activeChar) {
+        document.querySelectorAll('.character-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.textContent === activeChar);
+          if (btn.textContent === activeChar) btn.setAttribute('aria-pressed', 'true'); else btn.setAttribute('aria-pressed', 'false');
+        });
+      }
+
+      updateRecommendedCharacters() {
+        this.renderCharacterList('#recommended-characters', this.recommendedChars.slice(0, 12));
+      }
+
+      updateCustomHistoryList() {
+        // If no custom history, show placeholder
+        if (!this.customCharHistory || this.customCharHistory.length === 0) {
+          document.getElementById('custom-history-list').innerHTML = '<div class="empty-state">还没有自定义记录</div>';
+          return;
+        }
+        this.renderCharacterList('#custom-history-list', this.customCharHistory, true);
+      }
+
+      renderCharacterList(selector, charList, isHistory = false) {
+        const container = document.querySelector(selector);
+        container.innerHTML = "";
+        if (charList.length === 0) {
+          container.innerHTML = `<div class="empty-state">${isHistory ? "还没有自定义记录" : "推荐汉字已学完"}</div>`;
+          return;
+        }
+        charList.forEach(char => {
+          const btn = document.createElement("button");
+          btn.className = "character-btn";
+          btn.textContent = char;
+          btn.title = `练习 ${char}`;
+          btn.setAttribute('aria-label', `练习 ${char}`);
+          btn.onclick = () => this.loadCharacter(char);
+          btn.onkeydown = (e) => { if (e.key === 'Enter') this.loadCharacter(char); };
+          container.appendChild(btn);
+        });
+      }
+
+      updateHistory() {
+        const container = this.dom.historyListContainer;
+        const recents = Object.values(this.practiceHistory).flat().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 5);
+        container.innerHTML = "";
+        if (recents.length === 0) {
+          container.innerHTML = '<div class="empty-state">还没有练习记录</div>';
+          return;
+        }
+        recents.forEach(rec => {
+          const item = document.createElement("div");
+          item.className = "history-item";
+          item.tabIndex = 0;
+          item.dataset.char = rec.character;
+          item.innerHTML = `<div><div class="history-character">${rec.character}</div></div><div>${new Date(rec.timestamp).toLocaleDateString()}</div>`;
+          item.onclick = () => this.loadCharacter(rec.character);
+          item.onkeydown = (e) => { if (e.key === 'Enter') this.loadCharacter(rec.character); };
+          container.appendChild(item);
+        });
+      }
+
+      updateStats() {
+        document.getElementById("success-count").textContent = this.stats.successfulPractices;
+        document.getElementById("total-count").textContent = this.stats.totalPractices;
+      }
+
+      showMessage(text, type = "success", ttl = 3000) {
+        const container = this.dom.toastContainer;
+        if (!container) return;
+        container.innerHTML = "";
+        const message = document.createElement("div");
+        message.className = `toast-message ${type === 'error' ? 'error' : ''}`;
+        message.textContent = text;
+        message.setAttribute('role', 'status');
+        container.appendChild(message);
+        setTimeout(() => {
+          try { message.remove(); } catch (e) { }
+        }, ttl);
+      }
+
+      loadData(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch (e) { return fallback; }
+      }
+      saveData(key, data) {
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { /* ignore */ }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => new ChineseWritingApp());
+  </script>
+</body>
+
+</html>
